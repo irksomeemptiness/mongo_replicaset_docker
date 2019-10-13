@@ -1,0 +1,45 @@
+---
+
+- name: Add repository
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+
+
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+
+
+- name: Install packages
+  yum:
+    name: '{{role_rpm_packages}}'
+    state: present
+    disable_gpg_check: true
+
+- name: enable and start service docker
+  systemd:
+    name: docker
+    enabled: yes
+    masked: no
+    state: started
+
+- name: install python library
+  pip:
+    name:
+    - docker
+    - pymongo
+
+- name: Open a port for a mongo cluster listening
+  firewalld:
+    port: 27017/tcp
+    permanent: yes
+    zone: public
+    state: enabled
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded

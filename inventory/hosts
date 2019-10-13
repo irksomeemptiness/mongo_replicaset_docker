@@ -1,0 +1,8 @@
+[mongo]
+node1    ansible_host=192.168.56.112
+node2    ansible_host=192.168.56.115
+node3    ansible_host=192.168.56.116
+
+[mongo_node]
+node2    ansible_host=192.168.56.115
+node3    ansible_host=192.168.56.116

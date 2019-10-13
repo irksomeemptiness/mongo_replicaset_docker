@@ -1,0 +1,55 @@
+---
+- name: Create a directory for a DB files if it does not exist
+  file:
+    path: /opt/mongodb
+    state: directory
+    mode: '0755'
+
+- name: Create a directory for the config if it does not exist
+  file:
+    path: /opt/mongo
+    state: directory
+    mode: '0755'
+
+- name: copy config file
+  template:
+    src: mongodb.j2
+    dest: /opt/mongo/mongodb.conf
+    mode: '0644'
+
+
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].inventory_hostname }}"
+    state: present
+  with_items: "{{ groups['mongo'] }}"
+
+
+- name: Start container
+  docker_container:
+    name: "{{ inventory_hostname }}"
+    image: mongo:4-bionic
+    command: --config /opt/mongo/mongodb.conf
+    ports:
+      - "{{ db_port }}:{{ db_port }}"
+    volumes:
+      - "/opt/mongo:/opt/mongo:rw"
+      - "/opt/mongodb:/opt/mongodb:rw"
+      - "/etc/hosts:/etc/hosts:rw"
+
+- name: sleep 2 sec
+  wait_for:
+    timeout: 2
+
+- name: Ensure replicaset rs0 exists
+  mongodb_replicaset:
+    login_host: localhost
+    login_user: admin
+    login_password: admin
+    replica_set: rs0
+    members:
+    - node1:27017
+    - node2:27017
+    - node3:27017
+  when: "'node1' in inventory_hostname"

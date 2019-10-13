@@ -1,0 +1,13 @@
+storage:
+  dbPath: /data/db
+  journal:
+    enabled: true
+  engine: wiredTiger
+net:
+  port: {{ db_port }}
+  bindIp: 0.0.0.0
+operationProfiling:
+  slowOpThresholdMs: 2100
+  mode: off
+replication:
+  replSetName: {{ rs_name }}
