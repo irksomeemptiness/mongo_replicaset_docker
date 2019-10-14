@@ -1,4 +1,4 @@
-# mongo
+# mongo replicaset in docker container
 
 Run
 ```
